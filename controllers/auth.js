@@ -9,14 +9,16 @@ async function register(req, res) {
 }
 
 async function login(req, res) {
-  try {
-    const user = await User.checkExistUser(req.body);
-    const token = user.createJWT();
+  const user = await User.checkExistUser(req.body);
 
-    res.status(StatusCodes.OK).json({ user: { name: user.name }, token });
-  } catch (error) {
-    res.status(StatusCodes.UNAUTHORIZED).json({ error: error.message });
+  if (!user) {
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ error: "Invalid Credentials" });
   }
+
+  const token = user.createJWT();
+  res.status(StatusCodes.OK).json({ user: { name: user.name }, token });
 }
 
 export { register, login };
