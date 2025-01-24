@@ -23,7 +23,6 @@ app.use(xss());
 app.use(cors());
 import connectDB from "./db/connect.js";
 import authUser from "./middleware/authentication.js";
-import { RateLimiter } from "rate-limiter";
 
 // // routes
 app.use("/api/v1/auth", authRouter);
