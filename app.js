@@ -3,18 +3,25 @@ import "express-async-errors";
 import express from "express";
 import authRouter from "./routes/auth.js";
 import jobsRouter from "./routes/jobs.js";
+import helmet from "helmet";
+import cors from "cors";
+import xss from "xss-clean";
+import RateLimiter from "express-rate-limit";
+// error handler
+import notFoundMiddleware from "./middleware/not-found.js";
+import errorHandlerMiddleware from "./middleware/error-handler.js";
+import connectDB from "./db/connect.js";
+import authUser from "./middleware/authentication.js";
 
 const app = express();
 env.config();
 
-// error handler
-import notFoundMiddleware from "./middleware/not-found.js";
-import errorHandlerMiddleware from "./middleware/error-handler.js";
-
+app.set("trust proxy", 1);
+app.use(RateLimiter({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(express.json());
-// extra packages
-import connectDB from "./db/connect.js";
-import authUser from "./middleware/authentication.js";
+app.use(helmet());
+app.use(xss());
+app.use(cors());
 
 // // routes
 app.use("/api/v1/auth", authRouter);
