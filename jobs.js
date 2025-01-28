@@ -8,12 +8,13 @@ import {
 } from "./index.js";
 import { showLoginRegister } from "./loginRegister.js";
 import { showAddEdit } from "./addEdit.js";
-// import handleDelete from "./delete.js";
+import handleDelete from "./delete.js";
 
 let jobsDiv = null;
 let jobsTable = null;
 let jobsTableHeader = null;
 
+// This is inside handleJobs.js
 export const handleJobs = () => {
   jobsDiv = document.getElementById("jobs");
   const logoff = document.getElementById("logoff");
@@ -21,7 +22,7 @@ export const handleJobs = () => {
   jobsTable = document.getElementById("jobs-table");
   jobsTableHeader = document.getElementById("jobs-table-header");
 
-  jobsDiv.addEventListener("click", (e) => {
+  jobsDiv.addEventListener("click", async (e) => {
     if (inputEnabled && e.target.nodeName === "BUTTON") {
       if (e.target === addJob) {
         showAddEdit(null);
@@ -37,7 +38,48 @@ export const handleJobs = () => {
         message.textContent = "";
         showAddEdit(e.target.dataset.id);
       } else if (e.target.classList.contains("deleteButton")) {
-        message.textContent = "Delete Btn";
+        message.textContent = "Deleting...";
+
+        const jobId = e.target.dataset.id;
+
+        enableInput(false);
+
+        try {
+          const response = await fetch(
+            `http://localhost:3000/api/v1/jobs/${jobId}`, // Correct endpoint
+            {
+              method: "DELETE",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          const data = await response.json();
+
+          if (response.status === 200) {
+            message.textContent = "The job entry was deleted.";
+
+            // Remove the job from the UI
+            const jobElement = document.querySelector(
+              `[data-job-id="${jobId}"]`
+            );
+            if (jobElement) {
+              jobElement.remove();
+            }
+
+            // Optionally, you can refresh the job list
+            showJobs();
+          } else {
+            message.textContent = data.msg;
+          }
+        } catch (err) {
+          console.log(err);
+          message.textContent = "A communication error occurred.";
+        }
+
+        enableInput(true);
       }
     }
   });
