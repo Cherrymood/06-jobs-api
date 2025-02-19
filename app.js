@@ -21,9 +21,13 @@ app.use(RateLimiter({ windowMs: 15 * 60 * 1000, max: 100 }));
 app.use(express.json());
 app.use(helmet());
 app.use(xss());
+app.use(express.static("public"));
 app.use(cors());
 
 // // routes
+app.get("/", (req, res) => {
+  res.send('<h1>Jobs API</h1><a href="/api-docs">Documentation</a>');
+});
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/jobs", authUser, jobsRouter);
 
